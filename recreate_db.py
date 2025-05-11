@@ -2,87 +2,78 @@ import os
 import sys
 from werkzeug.security import generate_password_hash
 from flask import Flask
-from models import db, User, Sensor, Actuator  # Atuador -> Actuator
+from models import db, User, Sensor, Actuator  
 
-# Create a minimal Flask app for the database context
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///farm_system.db'  # users.db -> farm_system.db
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///farm_system.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize database with app
 db.init_app(app)
 
 def reset_db():
-    """Delete and recreate the database with sample data"""
-    # Check if the database file exists and delete it
-    db_path = os.path.join('instance', 'farm_system.db')  # users.db -> farm_system.db
+    """Deletar e recriar o banco de dados com dados de exemplo"""
+    db_path = os.path.join('instance', 'farm_system.db')
     if os.path.exists(db_path):
-        print(f"Removing existing database: {db_path}")
+        print(f"Removendo banco de dados existente: {db_path}")
         os.remove(db_path)
     else:
-        print("No existing database found. Creating new database.")
+        print("Nenhum banco de dados encontrado. Criando novo banco de dados.")
     
-    # Make sure the instance directory exists
     os.makedirs('instance', exist_ok=True)
     
     with app.app_context():
-        print("Creating database tables...")
+        print("Criando tabelas do banco de dados...")
         db.create_all()
         
-        print("Adding sample users...")
-        # Create admin user
+        print("Adicionando usuários de exemplo...")
         admin = User(
             username="admin",
-            email="admin@example.com",
+            email="admin@exemplo.com.br",
             password="admin123",
             is_admin=True
         )
         
-        # Create regular users
         user1 = User(
-            username="user1",
-            email="user1@example.com",
-            password="password123",
+            username="usuario1",
+            email="usuario1@exemplo.com.br",
+            password="senha123",
             is_admin=False
         )
         
         user2 = User(
-            username="user2",
-            email="user2@example.com",
-            password="password123",
+            username="usuario2",
+            email="usuario2@exemplo.com.br",
+            password="senha123",
             is_admin=False
         )
         
         db.session.add_all([admin, user1, user2])
         
-        print("Adding sample sensors...")
-        # Create sample sensors
-        sensor1 = Sensor(name="Temperature Sensor", value=25.5)  # nome -> name, valor -> value
-        sensor2 = Sensor(name="Humidity Sensor", value=65.0)     # nome -> name, valor -> value
-        sensor3 = Sensor(name="Light Sensor", value=500)         # nome -> name, valor -> value
-        sensor4 = Sensor(name="CO2 Sensor", value=410.2)         # nome -> name, valor -> value
+        print("Adicionando sensores de exemplo...")
+        sensor1 = Sensor(name="Sensor de Temperatura", value=25.5)  
+        sensor2 = Sensor(name="Sensor de Umidade", value=65.0)     
+        sensor3 = Sensor(name="Sensor de Luminosidade", value=500)         
+        sensor4 = Sensor(name="Sensor de CO2", value=410.2)         
         
         db.session.add_all([sensor1, sensor2, sensor3, sensor4])
         
-        print("Adding sample actuators...")
-        # Create sample actuators
-        actuator1 = Actuator(name="Living Room Light", status=False)  # Atuador -> Actuator, nome -> name, estado -> status
-        actuator2 = Actuator(name="Air Conditioning", status=True)    # Atuador -> Actuator, nome -> name, estado -> status
-        actuator3 = Actuator(name="Garden Irrigation", status=False)  # Atuador -> Actuator, nome -> name, estado -> status
-        actuator4 = Actuator(name="Electronic Lock", status=True)     # Atuador -> Actuator, nome -> name, estado -> status
+        print("Adicionando atuadores de exemplo...")
+        actuator1 = Actuator(name="Luz da Sala", status=False)  
+        actuator2 = Actuator(name="Ar Condicionado", status=True)    
+        actuator3 = Actuator(name="Irrigação do Jardim", status=False)  
+        actuator4 = Actuator(name="Fechadura Eletrônica", status=True)     
         
         db.session.add_all([actuator1, actuator2, actuator3, actuator4])
         
-        # Commit all changes
         db.session.commit()
-        print("Database initialized with sample data!")
+        print("Banco de dados inicializado com dados de exemplo!")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--force":
         reset_db()
     else:
-        response = input("This will delete the existing database. Continue? (y/N): ")
-        if response.lower() == 'y':
+        response = input("Isso irá deletar o banco de dados existente. Continuar? (s/N): ")
+        if response.lower() == 's':
             reset_db()
         else:
-            print("Operation cancelled.")
+            print("Operação cancelada.")

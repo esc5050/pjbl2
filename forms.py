@@ -3,23 +3,23 @@ from wtforms import StringField, PasswordField, SubmitField, EmailField, Boolean
 from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=50)])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
-    submit = SubmitField('Login')
+    username = StringField('Nome de Usuário', validators=[DataRequired(), Length(min=3, max=50)])
+    password = PasswordField('Senha', validators=[DataRequired(), Length(min=6)])
+    submit = SubmitField('Entrar')
 
 class UserForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=50)])
-    email = EmailField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[
+    username = StringField('Nome de Usuário', validators=[DataRequired(), Length(min=3, max=50)])
+    email = EmailField('E-mail', validators=[DataRequired(), Email()])
+    password = PasswordField('Senha', validators=[
         Optional(),
-        Length(min=6, message='Password must have at least 6 characters')
+        Length(min=6, message='A senha deve ter pelo menos 6 caracteres')
     ])
-    confirm_password = PasswordField('Confirm Password', validators=[
+    confirm_password = PasswordField('Confirmar Senha', validators=[
         Optional(),
-        EqualTo('password', message='Passwords must match')
+        EqualTo('password', message='As senhas devem coincidir')
     ])
-    is_admin = BooleanField('Administrator')
-    submit = SubmitField('Save')
+    is_admin = BooleanField('Administrador')
+    submit = SubmitField('Salvar')
     is_create = False
     
     def validate(self, extra_validators=None):
@@ -29,30 +29,30 @@ class UserForm(FlaskForm):
             
         # For new users, password is required
         if self.is_create and not self.password.data:
-            self.password.errors = ['Password is required for new users']
+            self.password.errors = ['Senha é obrigatória para novos usuários']
             return False
             
         # If password is provided, confirm_password must match
         if self.password.data and self.password.data != self.confirm_password.data:
-            self.confirm_password.errors = ['Passwords must match']
+            self.confirm_password.errors = ['As senhas devem coincidir']
             return False
             
         return True
 
 class RegisterForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=20)])
-    email = EmailField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField('Confirm Password', 
-                                    validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField('Register')
+    username = StringField('Nome de Usuário', validators=[DataRequired(), Length(min=3, max=20)])
+    email = EmailField('E-mail', validators=[DataRequired(), Email()])
+    password = PasswordField('Senha', validators=[DataRequired(), Length(min=6)])
+    confirm_password = PasswordField('Confirmar Senha', 
+                                    validators=[DataRequired(), EqualTo('password', message='As senhas devem coincidir')])
+    submit = SubmitField('Cadastrar')
 
 class SensorForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])  # nome -> name
-    value = FloatField('Value', validators=[DataRequired()]) # valor -> value
-    submit = SubmitField('Save')
+    name = StringField('Nome', validators=[DataRequired()])
+    value = FloatField('Valor', validators=[DataRequired()])
+    submit = SubmitField('Salvar')
 
-class ActuatorForm(FlaskForm):                               # AtuadorForm -> ActuatorForm
-    name = StringField('Name', validators=[DataRequired()])  # nome -> name
-    status = BooleanField('Status (On)')                    # estado -> status
-    submit = SubmitField('Save')
+class ActuatorForm(FlaskForm):
+    name = StringField('Nome', validators=[DataRequired()])
+    status = BooleanField('Status (Ligado)')
+    submit = SubmitField('Salvar')

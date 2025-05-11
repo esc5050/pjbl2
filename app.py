@@ -221,7 +221,7 @@ def admin_create_sensor():
         
         # Publish sensor creation event to MQTT if available
         if mqtt_available:
-            publish('admin/sensor/create', f"New sensor created: {sensor.name}")
+            publish('admin/sensor/create', f"Novo sensor criado: {sensor.name}")
         
         flash('Sensor criado com sucesso!', 'success')
         return redirect(url_for('admin_sensors'))
@@ -242,7 +242,7 @@ def admin_edit_sensor(sensor_id):
         
         # Publish sensor update event to MQTT if available
         if mqtt_available:
-            publish('admin/sensor/update', f"Sensor updated: {sensor.name}")
+            publish('admin/sensor/update', f"Sensor atualizado: {sensor.name}")
         
         flash('Sensor atualizado com sucesso!', 'success')
         return redirect(url_for('admin_sensors'))
@@ -288,9 +288,9 @@ def admin_create_actuator():  # admin_create_atuador -> admin_create_actuator
         
         # Publish actuator creation event to MQTT if available
         if mqtt_available:
-            publish('admin/actuator/create', f"New actuator created: {actuator.name}")
+            publish('admin/actuator/create', f"Novo atuador criado: {actuator.name}")
         
-        flash('Actuator created successfully!', 'success')
+        flash('Atuador criado com sucesso!', 'success')
         return redirect(url_for('admin_actuators'))  # admin_atuadores -> admin_actuators
     
     return render_template('admin/actuators/create.html', form=form)  # atuadores -> actuators
@@ -309,9 +309,9 @@ def admin_edit_actuator(actuator_id):  # admin_edit_atuador -> admin_edit_actuat
         
         # Publish actuator update event to MQTT if available
         if mqtt_available:
-            publish('admin/actuator/update', f"Actuator updated: {actuator.name}")
+            publish('admin/actuator/update', f"Atuador atualizado: {actuator.name}")
         
-        flash('Actuator updated successfully!', 'success')
+        flash('Atuador atualizado com sucesso!', 'success')
         return redirect(url_for('admin_actuators'))  # admin_atuadores -> admin_actuators
     
     return render_template('admin/actuators/edit.html', form=form, actuator=actuator)  # atuadores -> actuators
@@ -327,9 +327,9 @@ def admin_delete_actuator(actuator_id):  # admin_delete_atuador -> admin_delete_
     
     # Publish actuator deletion event to MQTT if available
     if mqtt_available:
-        publish('admin/actuator/delete', f"Actuator removed: {name}")
+        publish('admin/actuator/delete', f"Atuador removido: {name}")
     
-    flash('Actuator deleted successfully!', 'success')
+    flash('Atuador excluído com sucesso!', 'success')
     return redirect(url_for('admin_actuators'))  # admin_atuadores -> admin_actuators
 
 @app.route('/logout')

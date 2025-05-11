@@ -46,15 +46,15 @@ O sistema vem configurado com os seguintes usuários:
   - Senha: `admin123`
 
 - **Usuários comuns**:
-  - Usuário: `user1` / Senha: `password123`
-  - Usuário: `user2` / Senha: `password123`
+  - Usuário: `usuario1` / Senha: `senha123`
+  - Usuário: `usuario2` / Senha: `senha123`
 
 ## Resolução de Problemas
 
 ### Porta em uso
 Se receber um erro informando que a porta está em uso:
 ```
-OSError: [Errno 98] Address already in use
+OSError: [Errno 98] Endereço já em uso
 ```
 Execute o seguinte comando para encontrar e encerrar o processo:
 ```bash
