@@ -27,7 +27,7 @@
                 <div class="sensor-body">
                     <div class="sensor-value">24.5<span class="sensor-unit">°C</span></div>
                     <p>Estação Central</p>
-                    <div class="sensor-time">Última leitura: 11/12/2023 15:30</div>
+                    <div class="sensor-time">Última leitura: 11/05/2025 15:30</div>
                 </div>
             </div>
             
@@ -39,7 +39,7 @@
                 <div class="sensor-body">
                     <div class="sensor-value">78<span class="sensor-unit">%</span></div>
                     <p>Setor Norte - Plantação de Milho</p>
-                    <div class="sensor-time">Última leitura: 11/12/2023 15:45</div>
+                    <div class="sensor-time">Última leitura: 11/05/2025 15:45</div>
                 </div>
             </div>
             
@@ -51,7 +51,7 @@
                 <div class="sensor-body">
                     <div class="sensor-value">0<span class="sensor-unit">mm</span></div>
                     <p>Estação Central</p>
-                    <div class="sensor-time">Última leitura: 11/12/2023 15:30</div>
+                    <div class="sensor-time">Última leitura: 11/05/2025 15:30</div>
                 </div>
             </div>
             
@@ -63,7 +63,7 @@
                 <div class="sensor-body">
                     <div class="sensor-value">65<span class="sensor-unit">%</span></div>
                     <p>Reservatório Principal</p>
-                    <div class="sensor-time">Última leitura: 11/12/2023 14:15</div>
+                    <div class="sensor-time">Última leitura: 11/05/2025 14:15</div>
                 </div>
             </div>
         </div>
@@ -72,7 +72,10 @@
         <div class="admin-section">
             <h4>Opções de Administrador</h4>
             <p>Como administrador, você tem acesso a funcionalidades adicionais:</p>
-            <a href="{{ url_for('admin_users') }}" class="btn btn-primary">Gerenciar Usuários</a>
+            <div class="admin-buttons">
+                <a href="{{ url_for('admin_users') }}" class="btn btn-primary">Gerenciar Usuários</a>
+                <a href="{{ url_for('admin_sensors') }}" class="btn btn-primary">Gerenciar Sensores</a>
+            </div>
         </div>
         {% endif %}
     </div>

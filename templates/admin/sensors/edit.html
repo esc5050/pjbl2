@@ -1,0 +1,46 @@
+{% extends 'layout.html' %}
+
+{% block title %}Editar Sensor{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <h2>Editar Sensor</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-group">
+            {{ form.nome.label }}
+            {{ form.nome(class="form-control") }}
+            {% if form.nome.errors %}
+                {% for error in form.nome.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.valor.label }}
+            {{ form.valor(class="form-control") }}
+            {% if form.valor.errors %}
+                {% for error in form.valor.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-actions">
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('admin_sensors') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, flash, session, request, abort
 from werkzeug.security import check_password_hash, generate_password_hash
-from forms import LoginForm, UserForm, RegisterForm
-from models import db, User
+from forms import LoginForm, UserForm, RegisterForm, SensorForm
+from models import db, User, Sensor
 import os
 import sqlite3
 from sqlalchemy import inspect
@@ -192,6 +192,73 @@ def admin_delete_user(user_id):
     
     flash('Usuário excluído com sucesso!', 'success')
     return redirect(url_for('admin_users'))
+
+# CRUD de sensores - Somente para administradores
+@app.route('/admin/sensors')
+@admin_required
+def admin_sensors():
+    sensors = Sensor.query.all()
+    return render_template('admin/sensors/index.html', sensors=sensors)
+
+@app.route('/admin/sensors/create', methods=['GET', 'POST'])
+@admin_required
+def admin_create_sensor():
+    form = SensorForm()
+    
+    if form.validate_on_submit():
+        sensor = Sensor(
+            nome=form.nome.data,
+            valor=form.valor.data
+        )
+        
+        db.session.add(sensor)
+        db.session.commit()
+        
+        # Publish sensor creation event to MQTT if available
+        if mqtt_available:
+            publish('admin/sensor/create', f"Novo sensor criado: {sensor.nome}")
+        
+        flash('Sensor criado com sucesso!', 'success')
+        return redirect(url_for('admin_sensors'))
+    
+    return render_template('admin/sensors/create.html', form=form)
+
+@app.route('/admin/sensors/edit/<int:sensor_id>', methods=['GET', 'POST'])
+@admin_required
+def admin_edit_sensor(sensor_id):
+    sensor = Sensor.query.get_or_404(sensor_id)
+    form = SensorForm(obj=sensor)
+    
+    if form.validate_on_submit():
+        sensor.nome = form.nome.data
+        sensor.valor = form.valor.data
+        
+        db.session.commit()
+        
+        # Publish sensor update event to MQTT if available
+        if mqtt_available:
+            publish('admin/sensor/update', f"Sensor atualizado: {sensor.nome}")
+        
+        flash('Sensor atualizado com sucesso!', 'success')
+        return redirect(url_for('admin_sensors'))
+    
+    return render_template('admin/sensors/edit.html', form=form, sensor=sensor)
+
+@app.route('/admin/sensors/delete/<int:sensor_id>', methods=['POST'])
+@admin_required
+def admin_delete_sensor(sensor_id):
+    sensor = Sensor.query.get_or_404(sensor_id)
+    
+    nome = sensor.nome
+    db.session.delete(sensor)
+    db.session.commit()
+    
+    # Publish sensor deletion event to MQTT if available
+    if mqtt_available:
+        publish('admin/sensor/delete', f"Sensor removido: {nome}")
+    
+    flash('Sensor excluído com sucesso!', 'success')
+    return redirect(url_for('admin_sensors'))
 
 @app.route('/logout')
 def logout():

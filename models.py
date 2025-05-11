@@ -18,3 +18,12 @@ class User(db.Model):
     
     def __repr__(self):
         return f'<User {self.username}>'
+
+class Sensor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    valor = db.Column(db.Float, default=0.0)
+    
+    def __init__(self, nome, valor=0.0):
+        self.nome = nome
+        self.valor = valor
