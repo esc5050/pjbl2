@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "author": "Anonymous maker",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-led", "id": "led1", "top": 34.8, "left": -313, "attrs": { "color": "red" } },
+    { "type": "wokwi-dht22", "id": "dht1", "top": -162.9, "left": 119.4, "attrs": {} },
+    { "type": "wokwi-servo", "id": "servo1", "top": 103.6, "left": 316.8, "attrs": {} },
+    { "type": "wokwi-hc-sr04", "id": "ultrasonic1", "top": -142.5, "left": -157.7, "attrs": {} },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 176.75,
+      "left": -240,
+      "attrs": { "value": "1000" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led2",
+      "top": 34.8,
+      "left": -351.4,
+      "attrs": { "color": "blue" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led3",
+      "top": 34.8,
+      "left": -274.6,
+      "attrs": { "color": "limegreen" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 138.35,
+      "left": -240,
+      "attrs": { "value": "1000" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r3",
+      "top": 157.55,
+      "left": -240,
+      "attrs": { "value": "1000" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "ultrasonic1:VCC", "esp:5V", "red", [ "v96", "h0", "v144" ] ],
+    [ "ultrasonic1:TRIG", "esp:18", "green", [ "v28.8", "h201.2", "v124.8" ] ],
+    [ "ultrasonic1:ECHO", "esp:19", "green", [ "v19.2", "h200.8", "v124.8" ] ],
+    [ "ultrasonic1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "dht1:VCC", "esp:5V", "red", [ "v9.6", "h-153.6", "v220.8" ] ],
+    [ "dht1:GND", "esp:GND.1", "black", [ "v38.4", "h-172.8", "v153.6" ] ],
+    [ "dht1:SDA", "esp:5", "green", [ "v0" ] ],
+    [ "servo1:PWM", "esp:15", "green", [ "h0" ] ],
+    [ "servo1:V+", "esp:5V", "green", [ "h-192", "v57.7", "h-134.4" ] ],
+    [ "servo1:GND", "esp:GND.1", "black", [ "h-172.8", "v86.4", "h-153.6", "v-86.4" ] ],
+    [ "led3:C", "esp:GND.1", "green", [ "v9.6", "h230.8", "v67.2" ] ],
+    [ "led1:C", "esp:GND.1", "green", [ "v19.2", "h259.6", "v57.6" ] ],
+    [ "led2:C", "esp:GND.1", "green", [ "v28.8", "h288.4", "v48" ] ],
+    [ "led3:A", "r2:1", "green", [ "v0" ] ],
+    [ "led1:A", "r3:1", "green", [ "v0" ] ],
+    [ "led2:A", "r1:1", "green", [ "v0" ] ],
+    [ "r2:2", "esp:2", "green", [ "v0", "h85.2", "v115.2", "h211.2", "v-96" ] ],
+    [ "r3:2", "esp:4", "red", [ "h75.6", "v105.6", "h230.4", "v-124.8" ] ],
+    [ "r1:2", "esp:22", "blue", [ "h66", "v96", "h249.6", "v-230.4" ] ]
+  ],
+  "dependencies": {}
+}
