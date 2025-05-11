@@ -17,6 +17,7 @@
             <ul class="nav-links">
                 {% if 'user_id' in session %}
                     <li><a href="{{ url_for('home') }}">Página Inicial</a></li>
+                    <li><a href="{{ url_for('realtime') }}">Dados em Tempo Real</a></li>
                     <li><a href="{{ url_for('logout') }}">Sair</a></li>
                 {% else %}
                     <li><a href="{{ url_for('login') }}">Entrar</a></li>

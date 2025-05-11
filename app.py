@@ -5,6 +5,7 @@ from models import db, User, Sensor, Atuador
 import os
 import sqlite3
 from sqlalchemy import inspect
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-dev-key')
@@ -14,11 +15,15 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialize database
 db.init_app(app)
 
+# Initialize SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 # Import and initialize MQTT with safer approach
 try:
-    from mqtt_client import mqtt_client, publish, init_app as init_mqtt
+    from mqtt_client import mqtt_client, publish, init_app as init_mqtt, init_socketio
     # Only initialize if the import worked
     init_mqtt(app)
+    init_socketio(socketio)  # Pass socketio instance to mqtt_client
     mqtt_available = True
 except Exception as e:
     print(f"MQTT not available: {str(e)}")
@@ -341,6 +346,33 @@ def logout():
     
     return redirect(url_for('login'))
 
+@app.route('/realtime')
+def realtime():
+    """Real-time data visualization page accessible to all logged-in users"""
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    return render_template('realtime.html', username=session['username'], is_admin=session.get('is_admin', False))
+
+@socketio.on('send_command')
+def handle_command(data):
+    """Handle commands from the frontend to be sent via MQTT"""
+    if 'user_id' not in session:
+        return
+    
+    # Only admins can send commands
+    if not session.get('is_admin', False):
+        return
+    
+    try:
+        topic = data.get('topic')
+        payload = data.get('payload')
+        if topic and payload:
+            publish(topic, str(payload))
+            print(f"Command sent to {topic}: {payload}")
+    except Exception as e:
+        print(f"Error sending command: {str(e)}")
+
 # Check if column exists in table
 def column_exists(table, column):
     engine = db.get_engine()
@@ -380,4 +412,6 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         create_admin_if_not_exists()
-    app.run(debug=True)
+    
+    # Use socketio.run instead of app.run
+    socketio.run(app, debug=True)

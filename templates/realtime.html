@@ -1,0 +1,382 @@
+{% extends 'layout.html' %}
+
+{% block title %}Dados em Tempo Real{% endblock %}
+
+{% block content %}
+<div class="realtime-container">
+    <h2>Monitoramento de Dados em Tempo Real</h2>
+    
+    <div class="sensor-status">
+        <div class="status-indicator">
+            <span class="status-dot" id="connection-status"></span>
+            <span id="connection-text">Conectando ao servidor...</span>
+        </div>
+        <div class="last-update" id="last-update">Última atualização: --</div>
+    </div>
+    
+    <div class="realtime-sensors">
+        <div class="sensor-card realtime-card">
+            <div class="sensor-header">
+                <i class="fas fa-temperature-high"></i>
+                <span>Umidade</span>
+            </div>
+            <div class="sensor-body">
+                <div class="sensor-value" id="humidity-value">--<span class="sensor-unit">%</span></div>
+                <div class="sensor-chart-container">
+                    <canvas id="humidity-chart" class="sensor-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sensor-card realtime-card">
+            <div class="sensor-header">
+                <i class="fas fa-ruler"></i>
+                <span>Distância</span>
+            </div>
+            <div class="sensor-body">
+                <div class="sensor-value" id="distance-value">--<span class="sensor-unit">cm</span></div>
+                <div class="sensor-chart-container">
+                    <canvas id="distance-chart" class="sensor-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sensor-card realtime-card">
+            <div class="sensor-header">
+                <i class="fas fa-bell"></i>
+                <span>Alertas</span>
+            </div>
+            <div class="sensor-body">
+                <div class="alert-container" id="alert-container">
+                    <div class="no-alerts" id="no-alerts">Nenhum alerta recente</div>
+                    <ul class="alert-list" id="alert-list"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if session.get('is_admin') %}
+    <div class="control-panel">
+        <h3>Painel de Controle</h3>
+        <div class="servo-control">
+            <label for="servo-position">Posição do Servo (0-180°):</label>
+            <input type="range" id="servo-position" min="0" max="180" value="90">
+            <span id="servo-value">90°</span>
+            <button id="send-servo-position" class="btn btn-primary">Enviar Posição</button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Include Socket.IO and Chart.js -->
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Connect to Socket.IO
+        const socket = io();
+        let humidityChart, distanceChart;
+        let humidityData = [];
+        let distanceData = [];
+        const MAX_DATA_POINTS = 20;
+        
+        // Status indicators
+        const connectionStatus = document.getElementById('connection-status');
+        const connectionText = document.getElementById('connection-text');
+        const lastUpdate = document.getElementById('last-update');
+        
+        socket.on('connect', function() {
+            connectionStatus.classList.add('connected');
+            connectionText.textContent = 'Conectado ao servidor';
+        });
+        
+        socket.on('disconnect', function() {
+            connectionStatus.classList.remove('connected');
+            connectionStatus.classList.add('disconnected');
+            connectionText.textContent = 'Desconectado do servidor';
+        });
+        
+        // Initialize charts
+        initCharts();
+        
+        // Listen for MQTT data
+        socket.on('mqtt_message', function(data) {
+            lastUpdate.textContent = `Última atualização: ${new Date().toLocaleTimeString()}`;
+            
+            if (data.topic === 'silo/humidity') {
+                updateHumidity(parseFloat(data.payload));
+            } else if (data.topic === 'silo/distance') {
+                updateDistance(parseFloat(data.payload));
+            } else if (data.topic === 'silo/alert') {
+                addAlert(data.payload);
+            }
+        });
+        
+        {% if session.get('is_admin') %}
+        // Servo control for admins
+        const servoPosition = document.getElementById('servo-position');
+        const servoValue = document.getElementById('servo-value');
+        const sendServoBtn = document.getElementById('send-servo-position');
+        
+        servoPosition.addEventListener('input', function() {
+            servoValue.textContent = this.value + '°';
+        });
+        
+        sendServoBtn.addEventListener('click', function() {
+            socket.emit('send_command', {
+                topic: 'silo/command',
+                payload: servoPosition.value
+            });
+        });
+        {% endif %}
+        
+        // Function to initialize charts
+        function initCharts() {
+            // Humidity chart
+            const humidityCtx = document.getElementById('humidity-chart').getContext('2d');
+            humidityChart = new Chart(humidityCtx, {
+                type: 'line',
+                data: {
+                    labels: [...Array(MAX_DATA_POINTS)].map(() => ''),
+                    datasets: [{
+                        label: 'Umidade (%)',
+                        data: Array(MAX_DATA_POINTS).fill(null),
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        tension: 0.4,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            
+            // Distance chart
+            const distanceCtx = document.getElementById('distance-chart').getContext('2d');
+            distanceChart = new Chart(distanceCtx, {
+                type: 'line',
+                data: {
+                    labels: [...Array(MAX_DATA_POINTS)].map(() => ''),
+                    datasets: [{
+                        label: 'Distância (cm)',
+                        data: Array(MAX_DATA_POINTS).fill(null),
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        tension: 0.4,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Function to update humidity data
+        function updateHumidity(value) {
+            // Update the display
+            document.getElementById('humidity-value').innerHTML = value.toFixed(1) + '<span class="sensor-unit">%</span>';
+            
+            // Update chart data
+            humidityData.push(value);
+            if (humidityData.length > MAX_DATA_POINTS) {
+                humidityData.shift();
+            }
+            
+            humidityChart.data.datasets[0].data = humidityData.concat(Array(MAX_DATA_POINTS - humidityData.length).fill(null));
+            humidityChart.data.labels = [...Array(MAX_DATA_POINTS - humidityData.length).fill(''), ...humidityData.map(() => '')];
+            humidityChart.update();
+        }
+        
+        // Function to update distance data
+        function updateDistance(value) {
+            // Update the display
+            document.getElementById('distance-value').innerHTML = value.toFixed(1) + '<span class="sensor-unit">cm</span>';
+            
+            // Update chart data
+            distanceData.push(value);
+            if (distanceData.length > MAX_DATA_POINTS) {
+                distanceData.shift();
+            }
+            
+            distanceChart.data.datasets[0].data = distanceData.concat(Array(MAX_DATA_POINTS - distanceData.length).fill(null));
+            distanceChart.data.labels = [...Array(MAX_DATA_POINTS - distanceData.length).fill(''), ...distanceData.map(() => '')];
+            distanceChart.update();
+        }
+        
+        // Function to add alert
+        function addAlert(message) {
+            const alertList = document.getElementById('alert-list');
+            const noAlerts = document.getElementById('no-alerts');
+            
+            // Hide the "no alerts" message
+            noAlerts.style.display = 'none';
+            
+            // Create new alert item
+            const alertItem = document.createElement('li');
+            alertItem.className = 'alert-item';
+            
+            const timestamp = document.createElement('span');
+            timestamp.className = 'alert-time';
+            timestamp.textContent = new Date().toLocaleTimeString();
+            
+            const alertMessage = document.createElement('span');
+            alertMessage.className = 'alert-message';
+            alertMessage.textContent = message;
+            
+            alertItem.appendChild(timestamp);
+            alertItem.appendChild(alertMessage);
+            
+            // Add to the list
+            alertList.prepend(alertItem);
+            
+            // Limit number of displayed alerts
+            if (alertList.childNodes.length > 5) {
+                alertList.removeChild(alertList.lastChild);
+            }
+        }
+    });
+</script>
+
+<style>
+    .realtime-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .sensor-status {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 10px 15px;
+        background: #f8f9fa;
+        border-radius: 6px;
+    }
+    
+    .status-indicator {
+        display: flex;
+        align-items: center;
+    }
+    
+    .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #ccc;
+        margin-right: 8px;
+    }
+    
+    .status-dot.connected {
+        background-color: #28a745;
+        box-shadow: 0 0 5px #28a745;
+    }
+    
+    .status-dot.disconnected {
+        background-color: #dc3545;
+        box-shadow: 0 0 5px #dc3545;
+    }
+    
+    .last-update {
+        color: #6c757d;
+        font-size: 0.9em;
+    }
+    
+    .realtime-sensors {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .realtime-card {
+        height: 300px;
+    }
+    
+    .sensor-chart-container {
+        height: 180px;
+        margin-top: 15px;
+    }
+    
+    .alert-container {
+        height: 220px;
+        overflow-y: auto;
+        border: 1px solid #eee;
+        padding: 10px;
+        border-radius: 4px;
+    }
+    
+    .no-alerts {
+        color: #6c757d;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .alert-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .alert-item {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .alert-time {
+        color: #6c757d;
+        font-size: 0.8em;
+        margin-bottom: 5px;
+    }
+    
+    .alert-message {
+        color: #dc3545;
+    }
+    
+    .control-panel {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 6px;
+    }
+    
+    .servo-control {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    #servo-position {
+        width: 200px;
+    }
+    
+    #servo-value {
+        min-width: 40px;
+    }
+</style>
+{% endblock %}
