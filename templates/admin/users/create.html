@@ -57,9 +57,12 @@
             {% endif %}
         </div>
         
-        <div class="form-group checkbox">
-            {{ form.is_admin(class="form-check-input") }}
-            {{ form.is_admin.label(class="form-check-label") }}
+        <div class="form-group">
+            <label for="is_admin">Tipo de Usuário</label>
+            <select name="is_admin" id="is_admin" class="form-control">
+                <option value="1" {% if form.is_admin.data %}selected{% endif %}>Administrador</option>
+                <option value="0" {% if not form.is_admin.data %}selected{% endif %}>Usuário Regular</option>
+            </select>
         </div>
         
         <div class="form-actions">

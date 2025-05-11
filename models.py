@@ -27,3 +27,12 @@ class Sensor(db.Model):
     def __init__(self, nome, valor=0.0):
         self.nome = nome
         self.valor = valor
+
+class Atuador(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    estado = db.Column(db.Boolean, default=False)  # False = Desligado, True = Ligado
+    
+    def __init__(self, nome, estado=False):
+        self.nome = nome
+        self.estado = estado

@@ -51,3 +51,8 @@ class SensorForm(FlaskForm):
     nome = StringField('Nome', validators=[DataRequired()])
     valor = FloatField('Valor', validators=[DataRequired()])
     submit = SubmitField('Salvar')
+
+class AtuadorForm(FlaskForm):
+    nome = StringField('Nome', validators=[DataRequired()])
+    estado = BooleanField('Estado (Ligado)')
+    submit = SubmitField('Salvar')

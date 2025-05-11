@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, flash, session, request, abort
 from werkzeug.security import check_password_hash, generate_password_hash
-from forms import LoginForm, UserForm, RegisterForm, SensorForm
-from models import db, User, Sensor
+from forms import LoginForm, UserForm, RegisterForm, SensorForm, AtuadorForm
+from models import db, User, Sensor, Atuador
 import os
 import sqlite3
 from sqlalchemy import inspect
@@ -259,6 +259,73 @@ def admin_delete_sensor(sensor_id):
     
     flash('Sensor excluído com sucesso!', 'success')
     return redirect(url_for('admin_sensors'))
+
+# CRUD de atuadores - Somente para administradores
+@app.route('/admin/atuadores')
+@admin_required
+def admin_atuadores():
+    atuadores = Atuador.query.all()
+    return render_template('admin/atuadores/index.html', atuadores=atuadores)
+
+@app.route('/admin/atuadores/create', methods=['GET', 'POST'])
+@admin_required
+def admin_create_atuador():
+    form = AtuadorForm()
+    
+    if form.validate_on_submit():
+        atuador = Atuador(
+            nome=form.nome.data,
+            estado=form.estado.data
+        )
+        
+        db.session.add(atuador)
+        db.session.commit()
+        
+        # Publish actuator creation event to MQTT if available
+        if mqtt_available:
+            publish('admin/atuador/create', f"Novo atuador criado: {atuador.nome}")
+        
+        flash('Atuador criado com sucesso!', 'success')
+        return redirect(url_for('admin_atuadores'))
+    
+    return render_template('admin/atuadores/create.html', form=form)
+
+@app.route('/admin/atuadores/edit/<int:atuador_id>', methods=['GET', 'POST'])
+@admin_required
+def admin_edit_atuador(atuador_id):
+    atuador = Atuador.query.get_or_404(atuador_id)
+    form = AtuadorForm(obj=atuador)
+    
+    if form.validate_on_submit():
+        atuador.nome = form.nome.data
+        atuador.estado = form.estado.data
+        
+        db.session.commit()
+        
+        # Publish actuator update event to MQTT if available
+        if mqtt_available:
+            publish('admin/atuador/update', f"Atuador atualizado: {atuador.nome}")
+        
+        flash('Atuador atualizado com sucesso!', 'success')
+        return redirect(url_for('admin_atuadores'))
+    
+    return render_template('admin/atuadores/edit.html', form=form, atuador=atuador)
+
+@app.route('/admin/atuadores/delete/<int:atuador_id>', methods=['POST'])
+@admin_required
+def admin_delete_atuador(atuador_id):
+    atuador = Atuador.query.get_or_404(atuador_id)
+    
+    nome = atuador.nome
+    db.session.delete(atuador)
+    db.session.commit()
+    
+    # Publish actuator deletion event to MQTT if available
+    if mqtt_available:
+        publish('admin/atuador/delete', f"Atuador removido: {nome}")
+    
+    flash('Atuador excluído com sucesso!', 'success')
+    return redirect(url_for('admin_atuadores'))
 
 @app.route('/logout')
 def logout():

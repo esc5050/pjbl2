@@ -1,10 +1,10 @@
 {% extends 'layout.html' %}
 
-{% block title %}Gerenciar Sensores{% endblock %}
+{% block title %}Gerenciar Atuadores{% endblock %}
 
 {% block content %}
 <div class="admin-container">
-    <h2>Gerenciamento de Sensores</h2>
+    <h2>Gerenciamento de Atuadores</h2>
     
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -16,9 +16,9 @@
     
     <div class="actions">
         <div class="btn-group" role="group">
-            <a href="{{ url_for('admin_create_sensor') }}" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Adicionar Sensor</a>
+            <a href="{{ url_for('admin_create_atuador') }}" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Adicionar Atuador</a>
+            <a href="{{ url_for('admin_sensors') }}" class="btn btn-info"><i class="fas fa-microchip"></i> Gerenciar Sensores</a>
             <a href="{{ url_for('admin_users') }}" class="btn btn-info"><i class="fas fa-users"></i> Gerenciar Usuários</a>
-            <a href="{{ url_for('admin_atuadores') }}" class="btn btn-info"><i class="fas fa-toggle-on"></i> Gerenciar Atuadores</a>
         </div>
     </div>
     
@@ -27,26 +27,26 @@
             <tr>
                 <th>ID</th>
                 <th>Nome</th>
-                <th>Valor</th>
+                <th>Estado</th>
                 <th>Ações</th>
             </tr>
         </thead>
         <tbody>
-            {% for sensor in sensors %}
+            {% for atuador in atuadores %}
             <tr>
-                <td>{{ sensor.id }}</td>
-                <td>{{ sensor.nome }}</td>
-                <td>{{ sensor.valor }}</td>
+                <td>{{ atuador.id }}</td>
+                <td>{{ atuador.nome }}</td>
+                <td>{{ "Ligado" if atuador.estado else "Desligado" }}</td>
                 <td>
-                    <a href="{{ url_for('admin_edit_sensor', sensor_id=sensor.id) }}" class="btn btn-sm btn-warning">Editar</a>
-                    <form class="inline-form" method="POST" action="{{ url_for('admin_delete_sensor', sensor_id=sensor.id) }}" onsubmit="return confirm('Tem certeza que deseja excluir este sensor?');">
+                    <a href="{{ url_for('admin_edit_atuador', atuador_id=atuador.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                    <form class="inline-form" method="POST" action="{{ url_for('admin_delete_atuador', atuador_id=atuador.id) }}" onsubmit="return confirm('Tem certeza que deseja excluir este atuador?');">
                         <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
                     </form>
                 </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="4" class="text-center">Nenhum sensor encontrado</td>
+                <td colspan="4" class="text-center">Nenhum atuador encontrado</td>
             </tr>
             {% endfor %}
         </tbody>
