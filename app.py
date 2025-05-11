@@ -74,40 +74,9 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if 'user_id' in session:
-        return redirect(url_for('home'))
-    
-    form = RegisterForm()
-    if form.validate_on_submit():
-        # Check if username already exists
-        if User.query.filter_by(username=form.username.data).first():
-            flash('Nome de usuário já existe', 'danger')
-            return render_template('register.html', form=form)
-        
-        # Check if email already exists
-        if User.query.filter_by(email=form.email.data).first():
-            flash('E-mail já registrado', 'danger')
-            return render_template('register.html', form=form)
-        
-        # Create new user
-        user = User(
-            username=form.username.data,
-            email=form.email.data,
-            password=form.password.data,
-            is_admin=False
-        )
-        
-        db.session.add(user)
-        db.session.commit()
-        
-        # Safely publish user registration event to MQTT
-        if mqtt_available:
-            publish('user/register', f"New user registered: {user.username}")
-        
-        flash('Cadastro realizado com sucesso! Faça login para continuar.', 'success')
-        return redirect(url_for('login'))
-    
-    return render_template('register.html', form=form)
+    # User registration is now admin-only
+    flash('O cadastro de novos usuários só pode ser feito por um administrador.', 'warning')
+    return redirect(url_for('login'))
 
 @app.route('/home')
 def home():
@@ -127,6 +96,7 @@ def admin_users():
 @admin_required
 def admin_create_user():
     form = UserForm()
+    form.is_create = True  # Mark this as a creation form
     
     if form.validate_on_submit():
         # Verifica se o usuário ou email já existe
@@ -136,6 +106,11 @@ def admin_create_user():
         
         if User.query.filter_by(email=form.email.data).first():
             flash('E-mail já registrado', 'danger')
+            return render_template('admin/users/create.html', form=form)
+        
+        # Verificar se a senha foi fornecida para novos usuários
+        if not form.password.data:
+            flash('Senha é obrigatória para novos usuários', 'danger')
             return render_template('admin/users/create.html', form=form)
         
         user = User(
@@ -162,11 +137,7 @@ def admin_create_user():
 def admin_edit_user(user_id):
     user = User.query.get_or_404(user_id)
     form = UserForm(obj=user)
-    
-    # Remover validação de senha se não for fornecida
-    if request.method == 'POST':
-        if not form.password.data:
-            del form.password
+    form.is_create = False  # Mark this as an edit form
     
     if form.validate_on_submit():
         # Verificar se o nome de usuário já está em uso por outro usuário
@@ -185,7 +156,7 @@ def admin_edit_user(user_id):
         user.email = form.email.data
         
         # Atualizar senha apenas se fornecida
-        if hasattr(form, 'password') and form.password.data:
+        if form.password.data:
             user.password_hash = generate_password_hash(form.password.data)
         
         user.is_admin = form.is_admin.data
