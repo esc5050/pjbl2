@@ -1,0 +1,55 @@
+{% extends 'layout.html' %}
+
+{% block title %}Gerenciar Usuários{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <h2>Gerenciamento de Usuários</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="actions">
+        <a href="{{ url_for('admin_create_user') }}" class="btn btn-primary">Adicionar Novo Usuário</a>
+    </div>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuário</th>
+                <th>E-mail</th>
+                <th>Administrador</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ "Sim" if user.is_admin else "Não" }}</td>
+                <td class="actions">
+                    <a href="{{ url_for('admin_edit_user', user_id=user.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                    {% if user.id != session.user_id %}
+                    <form method="POST" action="{{ url_for('admin_delete_user', user_id=user.id) }}" class="inline-form" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?')">
+                        <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="actions" style="margin-top: 2rem;">
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">Voltar ao Painel</a>
+    </div>
+</div>
+{% endblock %}

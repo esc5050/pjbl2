@@ -1,0 +1,71 @@
+{% extends 'layout.html' %}
+
+{% block title %}Editar Usuário{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <h2>Editar Usuário</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form method="POST" action="{{ url_for('admin_edit_user', user_id=user.id) }}">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-group">
+            {{ form.username.label }}
+            {{ form.username(class="form-control") }}
+            {% if form.username.errors %}
+                {% for error in form.username.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email(class="form-control") }}
+            {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.password.label }}
+            {{ form.password(class="form-control", placeholder="Deixe em branco para manter a senha atual") }}
+            {% if form.password.errors %}
+                {% for error in form.password.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.confirm_password.label }}
+            {{ form.confirm_password(class="form-control") }}
+            {% if form.confirm_password.errors %}
+                {% for error in form.confirm_password.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group checkbox">
+            {{ form.is_admin(class="form-check-input") }}
+            {{ form.is_admin.label(class="form-check-label") }}
+        </div>
+        
+        <div class="form-actions">
+            <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">Cancelar</a>
+            {{ form.submit(class="btn btn-primary", value="Atualizar Usuário") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

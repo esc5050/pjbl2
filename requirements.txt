@@ -1,0 +1,9 @@
+Flask==2.2.3
+Flask-SQLAlchemy==3.0.3
+Flask-WTF==1.1.1
+Flask-MQTT==1.1.1
+email-validator==2.0.0
+paho-mqtt==1.6.1
+Werkzeug==2.2.3
+WTForms==3.0.1
+python-dotenv==1.0.0

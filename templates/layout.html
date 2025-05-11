@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - Monitoramento Rural</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">AgroSensores</div>
+            <ul class="nav-links">
+                {% if 'user_id' in session %}
+                    <li><a href="{{ url_for('home') }}">Página Inicial</a></li>
+                    <li><a href="{{ url_for('logout') }}">Sair</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}">Entrar</a></li>
+                    <li><a href="{{ url_for('register') }}">Cadastrar</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Sistema de Monitoramento de Sensores Rurais</p>
+    </footer>
+</body>
+</html>

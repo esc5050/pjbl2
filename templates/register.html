@@ -1,0 +1,69 @@
+{% extends 'layout.html' %}
+
+{% block title %}Cadastro{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <h2>Cadastro de Novo Usuário</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form method="POST" action="{{ url_for('register') }}">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-group">
+            {{ form.username.label(text="Nome de Usuário") }}
+            {{ form.username(class="form-control", placeholder="Escolha um nome de usuário") }}
+            {% if form.username.errors %}
+                {% for error in form.username.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.email.label(text="E-mail") }}
+            {{ form.email(class="form-control", placeholder="Digite seu e-mail") }}
+            {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.password.label(text="Senha") }}
+            {{ form.password(class="form-control", placeholder="Crie uma senha segura") }}
+            {% if form.password.errors %}
+                {% for error in form.password.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.confirm_password.label(text="Confirmar Senha") }}
+            {{ form.confirm_password(class="form-control", placeholder="Digite sua senha novamente") }}
+            {% if form.confirm_password.errors %}
+                {% for error in form.confirm_password.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.submit(class="btn btn-primary", value="Criar Conta") }}
+        </div>
+    </form>
+    
+    <div class="login-link">
+        <p>Já possui uma conta? <a href="{{ url_for('login') }}">Entrar no sistema</a></p>
+    </div>
+</div>
+{% endblock %}

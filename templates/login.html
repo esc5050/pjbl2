@@ -1,0 +1,49 @@
+{% extends 'layout.html' %}
+
+{% block title %}Entrar{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <h2>Entrar no Sistema</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form method="POST" action="{{ url_for('login') }}">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-group">
+            {{ form.username.label(text="Nome de Usuário") }}
+            {{ form.username(class="form-control", placeholder="Digite seu nome de usuário") }}
+            {% if form.username.errors %}
+                {% for error in form.username.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.password.label(text="Senha") }}
+            {{ form.password(class="form-control", placeholder="Digite sua senha") }}
+            {% if form.password.errors %}
+                {% for error in form.password.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.submit(class="btn btn-primary", value="Entrar no Sistema") }}
+        </div>
+    </form>
+    
+    <div class="register-link">
+        <p>Ainda não tem uma conta? <a href="{{ url_for('register') }}">Cadastre-se aqui</a></p>
+    </div>
+</div>
+{% endblock %}
