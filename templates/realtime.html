@@ -68,19 +68,16 @@
     {% endif %}
 </div>
 
-<!-- Include Socket.IO and Chart.js -->
 <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Connect to Socket.IO
         const socket = io();
         let humidityChart, distanceChart;
         let humidityData = [];
         let distanceData = [];
         const MAX_DATA_POINTS = 20;
         
-        // Status indicators
         const connectionStatus = document.getElementById('connection-status');
         const connectionText = document.getElementById('connection-text');
         const lastUpdate = document.getElementById('last-update');
@@ -96,10 +93,8 @@
             connectionText.textContent = 'Desconectado do servidor';
         });
         
-        // Initialize charts
         initCharts();
         
-        // Listen for MQTT data
         socket.on('mqtt_message', function(data) {
             lastUpdate.textContent = `Última atualização: ${new Date().toLocaleTimeString()}`;
             
@@ -113,7 +108,6 @@
         });
         
         {% if session.get('is_admin') %}
-        // Servo control for admins
         const servoPosition = document.getElementById('servo-position');
         const servoValue = document.getElementById('servo-value');
         const sendServoBtn = document.getElementById('send-servo-position');
@@ -130,9 +124,7 @@
         });
         {% endif %}
         
-        // Function to initialize charts
         function initCharts() {
-            // Humidity chart
             const humidityCtx = document.getElementById('humidity-chart').getContext('2d');
             humidityChart = new Chart(humidityCtx, {
                 type: 'line',
@@ -163,7 +155,6 @@
                 }
             });
             
-            // Distance chart
             const distanceCtx = document.getElementById('distance-chart').getContext('2d');
             distanceChart = new Chart(distanceCtx, {
                 type: 'line',
@@ -194,12 +185,9 @@
             });
         }
         
-        // Function to update humidity data
         function updateHumidity(value) {
-            // Update the display
             document.getElementById('humidity-value').innerHTML = value.toFixed(1) + '<span class="sensor-unit">%</span>';
             
-            // Update chart data
             humidityData.push(value);
             if (humidityData.length > MAX_DATA_POINTS) {
                 humidityData.shift();
@@ -210,12 +198,9 @@
             humidityChart.update();
         }
         
-        // Function to update distance data
         function updateDistance(value) {
-            // Update the display
             document.getElementById('distance-value').innerHTML = value.toFixed(1) + '<span class="sensor-unit">cm</span>';
             
-            // Update chart data
             distanceData.push(value);
             if (distanceData.length > MAX_DATA_POINTS) {
                 distanceData.shift();
@@ -226,15 +211,12 @@
             distanceChart.update();
         }
         
-        // Function to add alert
         function addAlert(message) {
             const alertList = document.getElementById('alert-list');
             const noAlerts = document.getElementById('no-alerts');
             
-            // Hide the "no alerts" message
             noAlerts.style.display = 'none';
             
-            // Create new alert item
             const alertItem = document.createElement('li');
             alertItem.className = 'alert-item';
             
@@ -249,10 +231,8 @@
             alertItem.appendChild(timestamp);
             alertItem.appendChild(alertMessage);
             
-            // Add to the list
             alertList.prepend(alertItem);
             
-            // Limit number of displayed alerts
             if (alertList.childNodes.length > 5) {
                 alertList.removeChild(alertList.lastChild);
             }

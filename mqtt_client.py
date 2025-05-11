@@ -2,28 +2,22 @@ import paho.mqtt.client as mqtt
 from flask_mqtt import Mqtt
 import os
 
-# Configure MQTT client
 mqtt_client = Mqtt()
 
-# Global reference to socketio for emitting events
 socketio = None
 
-# Define default MQTT settings
 DEFAULT_BROKER = 'localhost'
 DEFAULT_PORT = 1883
 DEFAULT_USERNAME = None
 DEFAULT_PASSWORD = None
 
-# Get MQTT settings from environment or use defaults
 MQTT_BROKER = os.environ.get('MQTT_BROKER', DEFAULT_BROKER)
 MQTT_PORT = int(os.environ.get('MQTT_PORT', DEFAULT_PORT))
 MQTT_USERNAME = os.environ.get('MQTT_USERNAME', DEFAULT_USERNAME)
 MQTT_PASSWORD = os.environ.get('MQTT_PASSWORD', DEFAULT_PASSWORD)
 
-# Flag to check if MQTT should be enabled
 MQTT_ENABLED = os.environ.get('MQTT_ENABLED', 'false').lower() == 'true'
 
-# Define topics to subscribe to
 TOPIC_HUMIDITY = "silo/humidity"
 TOPIC_DISTANCE = "silo/distance"
 TOPIC_ALERT = "silo/alert"
@@ -46,7 +40,7 @@ def init_app(app):
     """Initialize MQTT client with the app if enabled"""
     if not MQTT_ENABLED:
         print("MQTT is disabled. Set MQTT_ENABLED=true to enable it.")
-        app.config['MQTT_BROKER_URL'] = MQTT_BROKER  # Set this anyway for Flask-MQTT
+        app.config['MQTT_BROKER_URL'] = MQTT_BROKER
         app.config['MQTT_BROKER_PORT'] = MQTT_PORT
         return
         
@@ -67,7 +61,6 @@ def init_app(app):
         def handle_connect(client, userdata, flags, rc):
             if rc == 0:
                 print("Connected to MQTT Broker")
-                # Subscribe to all relevant topics
                 mqtt_client.subscribe(TOPIC_HUMIDITY)
                 mqtt_client.subscribe(TOPIC_DISTANCE)
                 mqtt_client.subscribe(TOPIC_ALERT)
@@ -82,7 +75,6 @@ def init_app(app):
             payload = message.payload.decode()
             print(f"Received message on topic {topic}: {payload}")
             
-            # Forward message to connected clients via SocketIO
             if socketio:
                 socketio.emit('mqtt_message', {
                     'topic': topic,

@@ -23,16 +23,13 @@ class UserForm(FlaskForm):
     is_create = False
     
     def validate(self, extra_validators=None):
-        # First run the standard validation
         if not super(UserForm, self).validate(extra_validators=extra_validators):
             return False
             
-        # For new users, password is required
         if self.is_create and not self.password.data:
             self.password.errors = ['Senha é obrigatória para novos usuários']
             return False
             
-        # If password is provided, confirm_password must match
         if self.password.data and self.password.data != self.confirm_password.data:
             self.confirm_password.errors = ['As senhas devem coincidir']
             return False
