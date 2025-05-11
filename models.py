@@ -21,18 +21,24 @@ class User(db.Model):
 
 class Sensor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(100), nullable=False)
-    valor = db.Column(db.Float, default=0.0)
+    name = db.Column(db.String(100), nullable=False)  # nome -> name
+    value = db.Column(db.Float, default=0.0)          # valor -> value
     
-    def __init__(self, nome, valor=0.0):
-        self.nome = nome
-        self.valor = valor
+    def __init__(self, name, value=0.0):              # nome -> name, valor -> value
+        self.name = name
+        self.value = value
+    
+    def __repr__(self):
+        return f'<Sensor {self.name}>'
 
-class Atuador(db.Model):
+class Actuator(db.Model):                            # Atuador -> Actuator
     id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(100), nullable=False)
-    estado = db.Column(db.Boolean, default=False)  # False = Desligado, True = Ligado
+    name = db.Column(db.String(100), nullable=False)  # nome -> name
+    status = db.Column(db.Boolean, default=False)     # estado -> status
     
-    def __init__(self, nome, estado=False):
-        self.nome = nome
-        self.estado = estado
+    def __init__(self, name, status=False):           # nome -> name, estado -> status
+        self.name = name
+        self.status = status
+        
+    def __repr__(self):
+        return f'<Actuator {self.name}>'

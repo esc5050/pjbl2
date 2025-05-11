@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, flash, session, request, abort
 from werkzeug.security import check_password_hash, generate_password_hash
-from forms import LoginForm, UserForm, RegisterForm, SensorForm, AtuadorForm
-from models import db, User, Sensor, Atuador
+from forms import LoginForm, UserForm, RegisterForm, SensorForm, ActuatorForm  # Atualizado AtuadorForm -> ActuatorForm
+from models import db, User, Sensor, Actuator  # Atualizado Atuador -> Actuator
 import os
 import sqlite3
 from sqlalchemy import inspect
@@ -9,7 +9,7 @@ from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-dev-key')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///farm_system.db'  # users.db -> farm_system.db
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize database
@@ -198,7 +198,7 @@ def admin_delete_user(user_id):
     flash('Usuário excluído com sucesso!', 'success')
     return redirect(url_for('admin_users'))
 
-# CRUD de sensores - Somente para administradores
+# CRUD for sensors - Admin only
 @app.route('/admin/sensors')
 @admin_required
 def admin_sensors():
@@ -212,8 +212,8 @@ def admin_create_sensor():
     
     if form.validate_on_submit():
         sensor = Sensor(
-            nome=form.nome.data,
-            valor=form.valor.data
+            name=form.name.data,    # nome -> name
+            value=form.value.data    # valor -> value
         )
         
         db.session.add(sensor)
@@ -221,7 +221,7 @@ def admin_create_sensor():
         
         # Publish sensor creation event to MQTT if available
         if mqtt_available:
-            publish('admin/sensor/create', f"Novo sensor criado: {sensor.nome}")
+            publish('admin/sensor/create', f"New sensor created: {sensor.name}")
         
         flash('Sensor criado com sucesso!', 'success')
         return redirect(url_for('admin_sensors'))
@@ -235,14 +235,14 @@ def admin_edit_sensor(sensor_id):
     form = SensorForm(obj=sensor)
     
     if form.validate_on_submit():
-        sensor.nome = form.nome.data
-        sensor.valor = form.valor.data
+        sensor.name = form.name.data    # nome -> name
+        sensor.value = form.value.data  # valor -> value
         
         db.session.commit()
         
         # Publish sensor update event to MQTT if available
         if mqtt_available:
-            publish('admin/sensor/update', f"Sensor atualizado: {sensor.nome}")
+            publish('admin/sensor/update', f"Sensor updated: {sensor.name}")
         
         flash('Sensor atualizado com sucesso!', 'success')
         return redirect(url_for('admin_sensors'))
@@ -254,83 +254,83 @@ def admin_edit_sensor(sensor_id):
 def admin_delete_sensor(sensor_id):
     sensor = Sensor.query.get_or_404(sensor_id)
     
-    nome = sensor.nome
+    name = sensor.name
     db.session.delete(sensor)
     db.session.commit()
     
     # Publish sensor deletion event to MQTT if available
     if mqtt_available:
-        publish('admin/sensor/delete', f"Sensor removido: {nome}")
+        publish('admin/sensor/delete', f"Sensor removido: {name}")
     
     flash('Sensor excluído com sucesso!', 'success')
     return redirect(url_for('admin_sensors'))
 
-# CRUD de atuadores - Somente para administradores
-@app.route('/admin/atuadores')
+# CRUD for actuators - Admin only
+@app.route('/admin/actuators')  # atuadores -> actuators
 @admin_required
-def admin_atuadores():
-    atuadores = Atuador.query.all()
-    return render_template('admin/atuadores/index.html', atuadores=atuadores)
+def admin_actuators():  # admin_atuadores -> admin_actuators
+    actuators = Actuator.query.all()  # Atuador -> Actuator
+    return render_template('admin/actuators/index.html', actuators=actuators)  # alterado de atuadores=actuators
 
-@app.route('/admin/atuadores/create', methods=['GET', 'POST'])
+@app.route('/admin/actuators/create', methods=['GET', 'POST'])  # atuadores -> actuators
 @admin_required
-def admin_create_atuador():
-    form = AtuadorForm()
+def admin_create_actuator():  # admin_create_atuador -> admin_create_actuator
+    form = ActuatorForm()  # AtuadorForm -> ActuatorForm
     
     if form.validate_on_submit():
-        atuador = Atuador(
-            nome=form.nome.data,
-            estado=form.estado.data
+        actuator = Actuator(  # Atuador -> Actuator
+            name=form.name.data,    # nome -> name
+            status=form.status.data  # estado -> status
         )
         
-        db.session.add(atuador)
+        db.session.add(actuator)
         db.session.commit()
         
         # Publish actuator creation event to MQTT if available
         if mqtt_available:
-            publish('admin/atuador/create', f"Novo atuador criado: {atuador.nome}")
+            publish('admin/actuator/create', f"New actuator created: {actuator.name}")
         
-        flash('Atuador criado com sucesso!', 'success')
-        return redirect(url_for('admin_atuadores'))
+        flash('Actuator created successfully!', 'success')
+        return redirect(url_for('admin_actuators'))  # admin_atuadores -> admin_actuators
     
-    return render_template('admin/atuadores/create.html', form=form)
+    return render_template('admin/actuators/create.html', form=form)  # atuadores -> actuators
 
-@app.route('/admin/atuadores/edit/<int:atuador_id>', methods=['GET', 'POST'])
+@app.route('/admin/actuators/edit/<int:actuator_id>', methods=['GET', 'POST'])  # atuadores -> actuators, atuador_id -> actuator_id
 @admin_required
-def admin_edit_atuador(atuador_id):
-    atuador = Atuador.query.get_or_404(atuador_id)
-    form = AtuadorForm(obj=atuador)
+def admin_edit_actuator(actuator_id):  # admin_edit_atuador -> admin_edit_actuator, atuador_id -> actuator_id
+    actuator = Actuator.query.get_or_404(actuator_id)  # Atuador -> Actuator, atuador_id -> actuator_id
+    form = ActuatorForm(obj=actuator)  # AtuadorForm -> ActuatorForm
     
     if form.validate_on_submit():
-        atuador.nome = form.nome.data
-        atuador.estado = form.estado.data
+        actuator.name = form.name.data  # nome -> name
+        actuator.status = form.status.data  # estado -> status
         
         db.session.commit()
         
         # Publish actuator update event to MQTT if available
         if mqtt_available:
-            publish('admin/atuador/update', f"Atuador atualizado: {atuador.nome}")
+            publish('admin/actuator/update', f"Actuator updated: {actuator.name}")
         
-        flash('Atuador atualizado com sucesso!', 'success')
-        return redirect(url_for('admin_atuadores'))
+        flash('Actuator updated successfully!', 'success')
+        return redirect(url_for('admin_actuators'))  # admin_atuadores -> admin_actuators
     
-    return render_template('admin/atuadores/edit.html', form=form, atuador=atuador)
+    return render_template('admin/actuators/edit.html', form=form, actuator=actuator)  # atuadores -> actuators
 
-@app.route('/admin/atuadores/delete/<int:atuador_id>', methods=['POST'])
+@app.route('/admin/actuators/delete/<int:actuator_id>', methods=['POST'])  # atuadores -> actuators, atuador_id -> actuator_id
 @admin_required
-def admin_delete_atuador(atuador_id):
-    atuador = Atuador.query.get_or_404(atuador_id)
+def admin_delete_actuator(actuator_id):  # admin_delete_atuador -> admin_delete_actuator, atuador_id -> actuator_id
+    actuator = Actuator.query.get_or_404(actuator_id)  # Atuador -> Actuator, atuador_id -> actuator_id
     
-    nome = atuador.nome
-    db.session.delete(atuador)
+    name = actuator.name  # nome -> name
+    db.session.delete(actuator)
     db.session.commit()
     
     # Publish actuator deletion event to MQTT if available
     if mqtt_available:
-        publish('admin/atuador/delete', f"Atuador removido: {nome}")
+        publish('admin/actuator/delete', f"Actuator removed: {name}")
     
-    flash('Atuador excluído com sucesso!', 'success')
-    return redirect(url_for('admin_atuadores'))
+    flash('Actuator deleted successfully!', 'success')
+    return redirect(url_for('admin_actuators'))  # admin_atuadores -> admin_actuators
 
 @app.route('/logout')
 def logout():
@@ -386,7 +386,7 @@ def create_admin_if_not_exists():
         # Check if is_admin column exists, add if it doesn't
         if not column_exists('user', 'is_admin'):
             print("Adding missing 'is_admin' column to user table...")
-            conn = sqlite3.connect('instance/users.db')
+            conn = sqlite3.connect('instance/farm_system.db')  # users.db -> farm_system.db
             cursor = conn.cursor()
             cursor.execute('ALTER TABLE user ADD COLUMN is_admin BOOLEAN DEFAULT FALSE')
             conn.commit()
@@ -403,7 +403,7 @@ def create_admin_if_not_exists():
             )
             db.session.add(admin)
             db.session.commit()
-            print("Usuário administrador padrão criado: admin / admin123")
+            print("Default admin user created: admin / admin123")
     except Exception as e:
         print(f"Error during admin setup: {str(e)}")
         db.session.rollback()

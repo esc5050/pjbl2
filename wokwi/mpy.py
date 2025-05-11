@@ -7,6 +7,7 @@ import _thread
 
 client = None
 
+# Setup hardware pins
 sensor = dht.DHT22(Pin(5))
 trig = Pin(18, Pin.OUT)
 echo = Pin(19, Pin.IN)
@@ -15,6 +16,7 @@ led_red = Pin(4, Pin.OUT)
 led_blue = Pin(22, Pin.OUT)
 servo = PWM(Pin(15), freq=50)
 
+# MQTT Configuration
 MQTT_BROKER = "broker.emqx.io"
 MQTT_PORT = 1883
 CLIENT_ID = "esp32_silo_controller"
@@ -23,6 +25,7 @@ TOPIC_DISTANCE = "silo/distance"
 TOPIC_ALERT = "silo/alert"
 TOPIC_COMMAND = "silo/command"
 
+# WiFi Configuration
 SSID = "Visitantes"
 PASSWORD = ""
 

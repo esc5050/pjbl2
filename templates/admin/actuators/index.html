@@ -16,7 +16,7 @@
     
     <div class="actions">
         <div class="btn-group" role="group">
-            <a href="{{ url_for('admin_create_atuador') }}" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Adicionar Atuador</a>
+            <a href="{{ url_for('admin_create_actuator') }}" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Adicionar Atuador</a>
             <a href="{{ url_for('admin_sensors') }}" class="btn btn-info"><i class="fas fa-microchip"></i> Gerenciar Sensores</a>
             <a href="{{ url_for('admin_users') }}" class="btn btn-info"><i class="fas fa-users"></i> Gerenciar Usuários</a>
         </div>
@@ -32,14 +32,14 @@
             </tr>
         </thead>
         <tbody>
-            {% for atuador in atuadores %}
+            {% for actuator in actuators %}
             <tr>
-                <td>{{ atuador.id }}</td>
-                <td>{{ atuador.nome }}</td>
-                <td>{{ "Ligado" if atuador.estado else "Desligado" }}</td>
+                <td>{{ actuator.id }}</td>
+                <td>{{ actuator.name }}</td>
+                <td>{{ "Ligado" if actuator.status else "Desligado" }}</td>
                 <td>
-                    <a href="{{ url_for('admin_edit_atuador', atuador_id=atuador.id) }}" class="btn btn-sm btn-warning">Editar</a>
-                    <form class="inline-form" method="POST" action="{{ url_for('admin_delete_atuador', atuador_id=atuador.id) }}" onsubmit="return confirm('Tem certeza que deseja excluir este atuador?');">
+                    <a href="{{ url_for('admin_edit_actuator', actuator_id=actuator.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                    <form class="inline-form" method="POST" action="{{ url_for('admin_delete_actuator', actuator_id=actuator.id) }}" onsubmit="return confirm('Tem certeza que deseja excluir este atuador?');">
                         <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
                     </form>
                 </td>

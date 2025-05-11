@@ -3,23 +3,23 @@ from wtforms import StringField, PasswordField, SubmitField, EmailField, Boolean
 from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional
 
 class LoginForm(FlaskForm):
-    username = StringField('Nome de usuário', validators=[DataRequired(), Length(min=3, max=50)])
-    password = PasswordField('Senha', validators=[DataRequired(), Length(min=6)])
-    submit = SubmitField('Entrar')
+    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=50)])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    submit = SubmitField('Login')
 
 class UserForm(FlaskForm):
-    username = StringField('Nome de usuário', validators=[DataRequired(), Length(min=3, max=50)])
-    email = EmailField('E-mail', validators=[DataRequired(), Email()])
-    password = PasswordField('Senha', validators=[
+    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=50)])
+    email = EmailField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[
         Optional(),
-        Length(min=6, message='Senha deve ter pelo menos 6 caracteres')
+        Length(min=6, message='Password must have at least 6 characters')
     ])
-    confirm_password = PasswordField('Confirmar Senha', validators=[
-        Optional(),  # Make this optional too
-        EqualTo('password', message='As senhas devem coincidir')
+    confirm_password = PasswordField('Confirm Password', validators=[
+        Optional(),
+        EqualTo('password', message='Passwords must match')
     ])
-    is_admin = BooleanField('Administrador')
-    submit = SubmitField('Salvar')
+    is_admin = BooleanField('Administrator')
+    submit = SubmitField('Save')
     is_create = False
     
     def validate(self, extra_validators=None):
@@ -29,30 +29,30 @@ class UserForm(FlaskForm):
             
         # For new users, password is required
         if self.is_create and not self.password.data:
-            self.password.errors = ['Senha é obrigatória para novos usuários']
+            self.password.errors = ['Password is required for new users']
             return False
             
         # If password is provided, confirm_password must match
         if self.password.data and self.password.data != self.confirm_password.data:
-            self.confirm_password.errors = ['As senhas devem coincidir']
+            self.confirm_password.errors = ['Passwords must match']
             return False
             
         return True
 
 class RegisterForm(FlaskForm):
-    username = StringField('Nome de usuário', validators=[DataRequired(), Length(min=3, max=20)])
-    email = EmailField('E-mail', validators=[DataRequired(), Email()])
-    password = PasswordField('Senha', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField('Confirmar Senha', 
+    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=20)])
+    email = EmailField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    confirm_password = PasswordField('Confirm Password', 
                                     validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField('Cadastrar')
+    submit = SubmitField('Register')
 
 class SensorForm(FlaskForm):
-    nome = StringField('Nome', validators=[DataRequired()])
-    valor = FloatField('Valor', validators=[DataRequired()])
-    submit = SubmitField('Salvar')
+    name = StringField('Name', validators=[DataRequired()])  # nome -> name
+    value = FloatField('Value', validators=[DataRequired()]) # valor -> value
+    submit = SubmitField('Save')
 
-class AtuadorForm(FlaskForm):
-    nome = StringField('Nome', validators=[DataRequired()])
-    estado = BooleanField('Estado (Ligado)')
-    submit = SubmitField('Salvar')
+class ActuatorForm(FlaskForm):                               # AtuadorForm -> ActuatorForm
+    name = StringField('Name', validators=[DataRequired()])  # nome -> name
+    status = BooleanField('Status (On)')                    # estado -> status
+    submit = SubmitField('Save')

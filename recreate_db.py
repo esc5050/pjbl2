@@ -2,11 +2,11 @@ import os
 import sys
 from werkzeug.security import generate_password_hash
 from flask import Flask
-from models import db, User, Sensor, Atuador
+from models import db, User, Sensor, Actuator  # Atuador -> Actuator
 
 # Create a minimal Flask app for the database context
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///farm_system.db'  # users.db -> farm_system.db
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize database with app
@@ -15,7 +15,7 @@ db.init_app(app)
 def reset_db():
     """Delete and recreate the database with sample data"""
     # Check if the database file exists and delete it
-    db_path = os.path.join('instance', 'users.db')
+    db_path = os.path.join('instance', 'farm_system.db')  # users.db -> farm_system.db
     if os.path.exists(db_path):
         print(f"Removing existing database: {db_path}")
         os.remove(db_path)
@@ -40,16 +40,16 @@ def reset_db():
         
         # Create regular users
         user1 = User(
-            username="usuario1",
-            email="usuario1@example.com",
-            password="senha123",
+            username="user1",
+            email="user1@example.com",
+            password="password123",
             is_admin=False
         )
         
         user2 = User(
-            username="usuario2",
-            email="usuario2@example.com",
-            password="senha123",
+            username="user2",
+            email="user2@example.com",
+            password="password123",
             is_admin=False
         )
         
@@ -57,21 +57,21 @@ def reset_db():
         
         print("Adding sample sensors...")
         # Create sample sensors
-        sensor1 = Sensor(nome="Sensor de Temperatura", valor=25.5)
-        sensor2 = Sensor(nome="Sensor de Umidade", valor=65.0)
-        sensor3 = Sensor(nome="Sensor de Luz", valor=500)
-        sensor4 = Sensor(nome="Sensor de CO2", valor=410.2)
+        sensor1 = Sensor(name="Temperature Sensor", value=25.5)  # nome -> name, valor -> value
+        sensor2 = Sensor(name="Humidity Sensor", value=65.0)     # nome -> name, valor -> value
+        sensor3 = Sensor(name="Light Sensor", value=500)         # nome -> name, valor -> value
+        sensor4 = Sensor(name="CO2 Sensor", value=410.2)         # nome -> name, valor -> value
         
         db.session.add_all([sensor1, sensor2, sensor3, sensor4])
         
         print("Adding sample actuators...")
         # Create sample actuators
-        atuador1 = Atuador(nome="Lâmpada Sala", estado=False)
-        atuador2 = Atuador(nome="Ar Condicionado", estado=True)
-        atuador3 = Atuador(nome="Irrigação Jardim", estado=False)
-        atuador4 = Atuador(nome="Fechadura Eletrônica", estado=True)
+        actuator1 = Actuator(name="Living Room Light", status=False)  # Atuador -> Actuator, nome -> name, estado -> status
+        actuator2 = Actuator(name="Air Conditioning", status=True)    # Atuador -> Actuator, nome -> name, estado -> status
+        actuator3 = Actuator(name="Garden Irrigation", status=False)  # Atuador -> Actuator, nome -> name, estado -> status
+        actuator4 = Actuator(name="Electronic Lock", status=True)     # Atuador -> Actuator, nome -> name, estado -> status
         
-        db.session.add_all([atuador1, atuador2, atuador3, atuador4])
+        db.session.add_all([actuator1, actuator2, actuator3, actuator4])
         
         # Commit all changes
         db.session.commit()
