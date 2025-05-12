@@ -28,11 +28,13 @@
         </div>
         
         <div class="form-group">
-            <label for="status">Estado</label>
-            <select name="status" id="status" class="form-control">
-                <option value="1" {% if form.status.data %}selected{% endif %}>Ligado</option>
-                <option value="0" {% if not form.status.data %}selected{% endif %}>Desligado</option>
-            </select>
+            {{ form.status.label(text="Estado") }}
+            {{ form.status(class="form-control") }}
+            {% if form.status.errors %}
+                {% for error in form.status.errors %}
+                    <span class="error">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
         </div>
         
         <div class="form-actions">

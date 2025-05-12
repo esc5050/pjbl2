@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, EmailField, BooleanField, FloatField
+from wtforms import StringField, PasswordField, SubmitField, EmailField, BooleanField, FloatField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional
 
 class LoginForm(FlaskForm):
@@ -51,5 +51,5 @@ class SensorForm(FlaskForm):
 
 class ActuatorForm(FlaskForm):
     name = StringField('Nome', validators=[DataRequired()])
-    status = BooleanField('Status (Ligado)')
+    status = SelectField('Estado', choices=[('1', 'Ligado'), ('0', 'Desligado')], coerce=int)
     submit = SubmitField('Salvar')

@@ -107,11 +107,13 @@ def admin_create_user():
             flash('Senha é obrigatória para novos usuários', 'danger')
             return render_template('admin/users/create.html', form=form)
         
+        is_admin_value = request.form.get('is_admin') == '1'
+        
         user = User(
             username=form.username.data,
             email=form.email.data,
             password=form.password.data,
-            is_admin=form.is_admin.data
+            is_admin=is_admin_value
         )
         
         db.session.add(user)
@@ -149,7 +151,7 @@ def admin_edit_user(user_id):
         if form.password.data:
             user.password_hash = generate_password_hash(form.password.data)
         
-        user.is_admin = form.is_admin.data
+        user.is_admin = request.form.get('is_admin') == '1'
         
         db.session.commit()
         
@@ -257,7 +259,7 @@ def admin_create_actuator():
     if form.validate_on_submit():
         actuator = Actuator(
             name=form.name.data,
-            status=form.status.data
+            status=bool(form.status.data)  # Converter para boolean
         )
         
         db.session.add(actuator)
@@ -277,9 +279,13 @@ def admin_edit_actuator(actuator_id):
     actuator = Actuator.query.get_or_404(actuator_id)
     form = ActuatorForm(obj=actuator)
     
+    # Definir o valor inicial do select baseado no estado atual do atuador
+    if request.method == 'GET':
+        form.status.data = 1 if actuator.status else 0
+    
     if form.validate_on_submit():
         actuator.name = form.name.data
-        actuator.status = form.status.data
+        actuator.status = bool(form.status.data)  # Converter para boolean
         
         db.session.commit()
         
